@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>孩子学习辅助工具</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- script
+    <!-- <script src="https://unpkg.com/gojs/release/go-debug.js"></script>
+    <script src="/static/js/jquery-1.9.1.js"></script>
+    <script src="/static/js/jquery-ui.js"></script>
+    <script src="/static/js/mdui.min.js"></script> -->
+
+    <!-- css -->
+    <!-- <link rel="stylesheet" href="/static/css/mystyle.css">
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/mdui.min.css"> -->
+    <!-- script -->
+    <script src="/static/js/jquery-1.9.1.js"></script>
+    <script src="/static/js/jquery-ui.js"></script>
+    <script src="/static/js/mdui.min.js"></script>
+
+    <!-- css -->
+    <link rel="stylesheet" href="/static/css/Mystyle.css">
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/icons.css">
+    <link rel="stylesheet" href="/static/css/mdui.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- json-viewer -->
+    <script src="/static/json-viewer/jquery.json-viewer.js"></script>
+    <link href="/static/json-viewer/jquery.json-viewer.css" type="text/css" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/static/images/icons/mukexuexila.png" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Animate CSS -->
+    <link href="/static/vendors/animate/animate.css" rel="stylesheet">
+    <!-- Icon CSS-->
+    <link rel="stylesheet" href="/static/vendors/font-awesome/css/font-awesome.min.css">
+    <!-- Camera Slider -->
+    <link rel="stylesheet" href="/static/vendors/camera-slider/camera.css">
+    <!-- Owlcarousel CSS-->
+    <link rel="stylesheet" type="text/css" href="/static/vendors/owl_carousel/owl.carousel.css" media="all">
+
+    <!--Theme Styles CSS-->
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" media="all" />
+
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.min.js"></script>
+    <script src="js/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <div id="kidEduMainDiv" class="basediv" style="position:absolute; left:20%; min-height:600px; min-width:80%;">
+        <h1>练习小工具</h1>
+        <label for="subjectSelect">请选择想要练习的科目:</label>
+        <select name="subject" id="subjectSelect" title="选择要练习的科目">
+            <option value="math">数学</option>
+        </select>
+        <p></p>
+        <label for="gradeSelect">请选择年级:</label>
+        <select name="grade" id="gradeSelect" title="选择年级">
+            <option value="grade1First">一年级上</option>
+        </select>
+        <p></p>
+        <input type="button" value="开始练习" class="button blue bigrounded" onclick="showExam()">
+    </div>
+
+    <div id="mathExamDiv" class="basediv" style="position:absolute; top: 10%; left: 20%;">
+        <h1>请对以下题目作答</h1>
+        <label for="clockTxt">计时中: </label>
+        <input type="text" id="clockTxt" name="clock" size="10" readonly/>
+        <button onclick="interval=window.clearInterval(interval)" style="display: none">停止</button>
+        <p></p>
+        <ul class="responsive-table" id="mathExamUl">
+            <li class="table-header">
+                <div class="col col-1" style="color:#c2008f" title="">序号</div>
+                <div class="col col-2" style="color:#2134c2">题目</div>
+                <div class="col col-3" style="color:#ac5600">答案</div>
+            </li>
+        </ul>
+        <p></p>
+        <input type="button" id="submitBut" value="我要交卷" class="button blue bigrounded" onclick="submitAnswer()">
+    </div>
+
+    <div id="examResultDiv" class="basediv" style="position:absolute; top: 10%; left: 20%;">
+        <h1>练习结果</h1>
+        <label for="resultArea">本次练习取得的成绩: </label>
+        <p></p>
+        <textarea id="resultArea" cols="50" rows="2" readonly></textarea>
+        <p></p>
+        <input type="button" id="submitBut" value="需要订正" class="button rosy bigrounded" onclick="showExamAgain()">
+        <p>---</p>
+        <input type="button" id="correctBut" value="回主界面" class="button orange bigrounded" onclick="openMainDiv()">
+    </div>
+
+    <!-- for select and button -->
+    <script>
+        // 全局变量
+        let retryInfo = [];
+        let startTs;
+        let titleCnt = 20;
+        let examContent = [];
+
+        // 定时器
+        let interval=self.setInterval("clock()",1000);
+        function clock()
+        {
+            let d=new Date();
+            document.getElementById("clockTxt").value=d.toLocaleTimeString();
+        }
+
+        // 出题
+        function showExam() {
+            if (document.getElementById("subjectSelect").value === "math") {
+                let grade = document.getElementById("gradeSelect").value;
+                let post_url = "/kid/edu/math";
+                $.ajax({
+                    type: "POST",
+                    async: false, //加这个ajax就可以修改全局变量了
+                    dataType: "json",
+                    url: post_url,
+                    data: {
+                        "subject": "math",
+                        "grade": grade,
+                        "cnt": titleCnt,
+                    },
+                    success: function (data) {
+                        examContent = data;
+                    },
+                    error:function (xhr, ajaxOptions, thrownError) {
+                        alert('题目获取失败，请联系家长定位问题');
+                        {#alert(xhr.status);#}
+                        {#alert(thrownError);#}
+                    }
+                });
+
+                // 清理之前的题目
+                let ulDiv = document.getElementById('mathExamUl');
+                $('#mathExamUl li.table-row').each(function (index, item)
+                    {
+                        //console.log("each, item = ", item);
+                        ulDiv.removeChild(item);
+                    }
+                );
+                // 展示新获取的题目
+                for (let i = 0; i < examContent.length; i++) {
+                    let trId = new Date().getTime() + i;
+                    let trLi = document.createElement("li");
+                    trLi.id = 'exam_li_' + String(trId);
+                    trLi.setAttribute("class", "table-row");
+                    // 序号
+                    let divObj = document.createElement("div");
+                    divObj.setAttribute("class", "col col-1");
+                    divObj.setAttribute("data-label", "exam-item-idx");
+                    let inputObj = document.createElement("input");
+                    inputObj.setAttribute("type", "text");
+                    inputObj.setAttribute("name", "item-idx");
+                    inputObj.setAttribute("value", String(i+1));
+                    inputObj.setAttribute("size", "2");
+                    inputObj.setAttribute("readonly", "true");
+                    inputObj.setAttribute("style", "color:#c2008f");
+                    divObj.appendChild(inputObj);
+                    trLi.appendChild(divObj);
+                    // 题目
+                    divObj = document.createElement("div");
+                    divObj.setAttribute("class", "col col-2");
+                    divObj.setAttribute("data-label", "exam-item-title");
+                    inputObj = document.createElement("input");
+                    inputObj.setAttribute("type", "text");
+                    inputObj.setAttribute("name", "item-title");
+                    inputObj.setAttribute("value", examContent[i]['itemTitle']);
+                    inputObj.setAttribute("size", "15");
+                    inputObj.setAttribute("readonly", "true");
+                    inputObj.setAttribute("style", "color:#2134c2");
+                    divObj.appendChild(inputObj);
+                    trLi.appendChild(divObj);
+                    // 答案
+                    divObj = document.createElement("div");
+                    divObj.setAttribute("class", "col col-3");
+                    divObj.setAttribute("data-label", "exam-item-value");
+                    inputObj = document.createElement("input");
+                    inputObj.setAttribute("type", "text");
+                    inputObj.setAttribute("name", "item-value");
+                    //inputObj.setAttribute("value", examContent[i]['itemValue']);
+                    inputObj.setAttribute("size", "5");
+                    inputObj.setAttribute("style", "color:#ac5600");
+                    divObj.appendChild(inputObj);
+                    trLi.appendChild(divObj);
+
+                    ulDiv.appendChild(trLi);
+                }
+
+                openDiv(event, "mathExamDiv");
+                startTs = new Date().getTime();
+            }
+        }
+
+        // 订正
+        function showExamAgain() {
+            startTs = new Date().getTime();
+            if (document.getElementById("subjectSelect").value === "math") {
+                openDiv(event, "mathExamDiv");
+            }
+        }
+
+        // 回主界面
+        function openMainDiv() {
+            retryInfo = [];
+            openDiv(event, "kidEduMainDiv");
+        }
+
+        function formatDuring(mss) {
+            //let days = parseInt(mss / (1000 * 60 * 60 * 24));
+            let hours = parseInt(String((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+            let minutes = parseInt(String((mss % (1000 * 60 * 60)) / (1000 * 60)));
+            let seconds = (mss % (1000 * 60)) / 1000;
+            return hours + " 小时 " + minutes + " 分钟 " + seconds + " 秒 "; //days + " 天 " +
+        }
+
+        // 递交答案获取结果，因为要写日志所以放到python中取判断
+        function submitAnswer() {
+            let endTs =new Date().getTime();
+            let thisResult = {
+                duration: formatDuring(endTs - startTs),
+                corrCnt: 0,
+                errCnt: 0,
+                result: "",
+            };
+            if (document.getElementById("subjectSelect").value === "math") {
+                let thisAnswer = [];
+                $('#mathExamUl li.table-row').each(function (index, item)
+                    {
+                        let $item = $(item);
+                        let answer = $item.find("div input[name='item-value']").val();
+                        thisAnswer.push(answer);
+                    }
+                );
+                let post_url = "/kid/edu/math/score";
+                $.ajax({
+                    type: "POST",
+                    async: false, //加这个ajax就可以修改全局变量了
+                    dataType: "json",
+                    url: post_url,
+                    data: {
+                        "examContent": JSON.stringify(examContent),
+                        "duration": thisResult.duration,
+                        "answer": JSON.stringify(thisAnswer),
+                    },
+                    success: function (data) {
+                        thisResult = data;
+                    },
+                    error:function (xhr, ajaxOptions, thrownError) {
+                        alert('递交答案时出错，请联系家长');
+                        {#alert(xhr.status);#}
+                        {#alert(thrownError);#}
+                    }
+                });
+            }
+            retryInfo.push(thisResult);
+
+            //将历次提交的结果进行展示
+            let resultContent = "";
+            let resultAreaObj = document.getElementById("resultArea");
+            resultAreaObj.setAttribute("rows", String(retryInfo.length * 4));
+            for (let i = 0; i < retryInfo.length; i++) {
+                if (i === 0) {
+                    resultContent += "本次回答取得成绩为: " + retryInfo[i].result + "\n\n";
+                }
+                else {
+                    resultContent += "========\n第" + i + "次修正: " + retryInfo[i].result + "\n\n";
+                }
+            }
+            $(resultAreaObj).val(resultContent);//.replace(/\n/g,"\r\n");
+
+            // 将结果进行显示
+            openDiv(event, "examResultDiv");
+        }
+
+        // 与div的显示相关
+        function openDiv(evt, divName) {
+            let i, base_divs;
+            base_divs = document.getElementsByClassName("basediv");
+            for (i = 0; i < base_divs.length; i++) {
+                base_divs[i].style.display = "none";
+            }
+            document.getElementById(divName).style.display = "block";
+        }
+
+        openMainDiv(); // 默认打开主界面
+    </script>
+
+
+</body>
+
+</html>

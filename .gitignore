@@ -1,0 +1,16 @@
+
+*.pyc
+
+\.idea/
+
+database\.db
+
+database\.db-journal
+
+mid_result\.json
+
+output/
+
+logs/
+
+__pycache__/
