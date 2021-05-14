@@ -70,6 +70,13 @@
         <label for="gradeSelect">请选择年级:</label>
         <select name="grade" id="gradeSelect" title="选择年级">
             <option value="grade1First">一年级上</option>
+            <option value="grade2Second">二年级下</option>
+        </select>
+        <label for="difficultySelect">请选择难度:</label>
+        <select name="difficulty" id="difficultySelect" title="选择难度">
+            <option value=1>简单</option>
+            <option value=2>正常</option>
+            <option value=3>困难</option>
         </select>
         <p></p>
         <input type="button" value="开始练习" class="button blue bigrounded" onclick="showExam()">
@@ -90,6 +97,7 @@
         </ul>
         <p></p>
         <input type="button" id="submitBut" value="我要交卷" class="button blue bigrounded" onclick="submitAnswer()">
+        <input type="button" id="correctBut" value="回主界面" class="button orange bigrounded" onclick="openMainDiv()">
     </div>
 
     <div id="examResultDiv" class="basediv" style="position:absolute; top: 10%; left: 20%;">
@@ -123,6 +131,7 @@
         function showExam() {
             if (document.getElementById("subjectSelect").value === "math") {
                 let grade = document.getElementById("gradeSelect").value;
+                let difficulty = document.getElementById("difficultySelect").value;
                 let post_url = "/kid/edu/math";
                 $.ajax({
                     type: "POST",
@@ -132,6 +141,7 @@
                     data: {
                         "subject": "math",
                         "grade": grade,
+                        "difficulty": difficulty,
                         "cnt": titleCnt,
                     },
                     success: function (data) {
