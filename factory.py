@@ -14,6 +14,7 @@ import flask as f
 
 import log
 import kid_edu_bp
+import kid_game_bp
 
 
 def create_app(config_filename):
@@ -26,6 +27,7 @@ def create_app(config_filename):
     log.setup(app, log_file='logs/error.log')
 
     app.register_blueprint(kid_edu_bp.bp, url_prefix='/kid/edu/')
+    app.register_blueprint(kid_game_bp.bp, url_prefix='/kid/game/')
 
     @app.route('/healthz', methods=['GET'])
     def healthz():

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>孩子放松小游戏</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- script
+    <!-- <script src="https://unpkg.com/gojs/release/go-debug.js"></script>
+    <script src="/static/js/jquery-1.9.1.js"></script>
+    <script src="/static/js/jquery-ui.js"></script>
+    <script src="/static/js/mdui.min.js"></script> -->
+
+    <!-- css -->
+    <!-- <link rel="stylesheet" href="/static/css/mystyle.css">
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/mdui.min.css"> -->
+    <!-- script -->
+    <script src="/static/js/jquery-1.9.1.js"></script>
+    <script src="/static/js/jquery-ui.js"></script>
+    <script src="/static/js/mdui.min.js"></script>
+
+    <!-- css -->
+    <link rel="stylesheet" href="/static/css/Mystyle.css">
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/icons.css">
+    <link rel="stylesheet" href="/static/css/mdui.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- json-viewer -->
+    <script src="/static/json-viewer/jquery.json-viewer.js"></script>
+    <link href="/static/json-viewer/jquery.json-viewer.css" type="text/css" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/static/images/icons/mukexuexila.png" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Animate CSS -->
+    <link href="/static/vendors/animate/animate.css" rel="stylesheet">
+    <!-- Icon CSS-->
+    <link rel="stylesheet" href="/static/vendors/font-awesome/css/font-awesome.min.css">
+    <!-- Camera Slider -->
+    <link rel="stylesheet" href="/static/vendors/camera-slider/camera.css">
+    <!-- Owlcarousel CSS-->
+    <link rel="stylesheet" type="text/css" href="/static/vendors/owl_carousel/owl.carousel.css" media="all">
+
+    <!--Theme Styles CSS-->
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" media="all" />
+
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.min.js"></script>
+    <script src="js/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <div id="kidGameMainDiv" class="basediv" style="position:absolute; left:20%; min-height:600px; min-width:80%;">
+        <h1>放松小游戏</h1>
+        <label for="gameSelect">请选择想要玩的游戏:</label>
+        <select name="subject" id="gameSelect" title="选择要玩的游戏">
+            <option value="military">军棋</option>
+        </select>
+        <p></p>
+        <input type="button" value="查看游戏规则" class="button blue bigrounded" onclick="showGameRule()">
+    </div>
+
+    <div id="militaryMainDiv" class="basediv" style="position:absolute; left:20%; min-height:600px; min-width:80%;">
+        <h1>军棋的游戏规则: </h1>
+        <p></p>
+        <label for="militaryRule">军棋的游戏规则: </label>
+        <p></p>
+        <textarea id="militaryRule" cols="50" rows="11" readonly>
+            1. 军旗必须放在大本营中。
+            2. 炸弹不能放在第一排。
+            3. 地雷必须放在最后两排。
+            4. 地雷与军旗不能移动。
+            5. 若一方司令被消灭而另一方司令尚在，则失去司令的一方需要亮明自己的军旗。
+            6. 工兵在铁路线上可以拐弯。
+            7. 炸弹遇到所有敌棋皆同归于尽，包括军旗。
+            8. 军旗小于所有棋子，且被攻击一方输掉比赛。
+            9. 需要选择地雷遇到工兵和炸弹之外的棋子的规则。
+        </textarea>
+        <p></p>
+        <label for="mineRuleSelect">请选地雷被工兵和炸弹之外的棋子攻击时的规则:</label>
+        <select name="mineRule" id="mineRuleSelect" title="选择难度">
+            <option value="allDone">同归于尽</option>
+            <option value="mineRemain">保留地雷</option>
+        </select>
+        <p></p>
+        <input type="button" value="开始游戏" class="button blue bigrounded" onclick="beginMilitaryGame()">
+        <hr />
+        <p></p>
+        <input type="button" id="correctBut" value="回主界面" class="button orange bigrounded" onclick="openMainDiv()">
+    </div>
+
+    <div id="militaryAttackDiv" class="basediv" style="position:absolute; top: 10%; left: 20%;">
+        <h1>进攻方选择自己正在进攻的棋子</h1>
+        <p></p>
+        <label for="attackPieceSelect">请选棋子的军衔（诚实诚信，拒绝赖歪毛子）:</label>
+        <select name="piece" id="attackPieceSelect" title="选择棋子的大小">
+            <option value=unselected>请选择</option>
+            <option value=1>工兵</option>
+            <option value=2>排长</option>
+            <option value=3>连长</option>
+            <option value=4>营长</option>
+            <option value=5>团长</option>
+            <option value=6>旅长</option>
+            <option value=7>师长</option>
+            <option value=8>军长</option>
+            <option value=9>司令</option>
+            <option value=-1>炸弹</option>
+        </select>
+        <p></p>
+        <input type="button" id="submitBut" value="点击确定进攻方选择完毕" class="button blue bigrounded" onclick="militaryDefenseDiv()">
+        <hr />
+        <input type="button" id="correctBut" value="退出游戏" class="button orange bigrounded" onclick="gameOverDiv()">
+    </div>
+
+    <div id="militaryDefenseDiv" class="basediv" style="position:absolute; top: 10%; left: 20%;">
+        <h1>防守方方选择自己被进攻的棋子</h1>
+        <p></p>
+        <label for="defensePieceSelect">请选棋子的军衔（诚实诚信，拒绝赖歪毛子）:</label>
+        <select name="piece" id="defensePieceSelect" title="选择棋子的大小">
+            <option value=unselected>请选择</option>
+            <option value=0>军旗</option>
+            <option value=1>工兵</option>
+            <option value=2>排长</option>
+            <option value=3>连长</option>
+            <option value=4>营长</option>
+            <option value=5>团长</option>
+            <option value=6>旅长</option>
+            <option value=7>师长</option>
+            <option value=8>军长</option>
+            <option value=9>司令</option>
+            <option value=-1>炸弹</option>
+            <option value=-2>地雷</option>
+        </select>
+        <p></p>
+        <input type="button" id="submitBut" value="点击确定开始比大小" class="button blue bigrounded" onclick="militaryFight()">
+        <hr />
+        <input type="button" id="correctBut" value="退出游戏" class="button orange bigrounded" onclick="gameOverDiv()">
+    </div>
+
+    <div id="fightResultDiv" class="basediv" style="position:absolute; top: 10%; left: 20%;">
+        <h1>战斗结果</h1>
+        <label for="resultArea">本次战斗的结果为: </label>
+        <p></p>
+        <textarea id="resultArea" cols="50" rows="3" readonly></textarea>
+        <p></p>
+        <input type="button" id="submitBut" value="再次发起进攻" class="button rosy bigrounded" onclick="militaryAttackAgain()">
+        <hr />
+        <input type="button" id="correctBut" value="结束游戏" class="button orange bigrounded" onclick="gameOverDiv()">
+    </div>
+
+    <!-- for select and button -->
+    <script>
+        // 全局变量
+        let commanderHasDone = false;  // 是否有一方的司令阵亡过
+        let mineRule = "";  // 地雷的规则
+        let bombRemain = 4;  // 炸弹的总数
+        let mineRemain = 6;  // 地雷的总数
+
+        // 打开游戏规则
+        function showGameRule() {
+            if (document.getElementById("gameSelect").value === "military") {
+                openDiv(event, "militaryMainDiv");
+            }
+        }
+
+        // 开始军棋游戏
+        function beginMilitaryGame() {
+            // 初始化全局变量
+            commanderHasDone = false;
+            mineRule = document.getElementById("mineRuleSelect").value;
+            bombRemain = 4;
+            if (mineRule === "allDone") {
+                mineRemain = 6;
+            }
+            else {
+                mineRemain = 999;
+            }
+            openDiv(event, "militaryAttackDiv");
+        }
+
+        // 军棋防守方选择
+        function militaryDefenseDiv() {
+            if (document.getElementById("attackPieceSelect").value === "unselected") {
+                alert("请选择进攻方棋子军衔");
+            }
+            else {
+                openDiv(event, "militaryDefenseDiv");
+            }
+        }
+
+        // 军旗比较大小
+        function militaryFight() {
+            if (document.getElementById("defensePieceSelect").value === "unselected") {
+                alert("请选择进攻方棋子军衔");
+                return;
+            }
+            if (mineRule === "") {
+                alert("游戏遇到bug，请抓紧告知家长！")
+            }
+            else {
+                let attack = Number(document.getElementById("attackPieceSelect").value);
+                let defense = Number(document.getElementById("defensePieceSelect").value);
+                let attackAlive = true;
+                let defenseAlive = true;
+                let attackCommanderDone = false;
+                let defenseCommanderDone = false;
+                let attackWin = false;
+                let fightResult;
+                if (attack < 0) {
+                    bombRemain--;
+                    attackAlive = false;
+                    defenseAlive = false;
+                    if (defense === 9 && commanderHasDone === false) {
+                        commanderHasDone = true;
+                        defenseCommanderDone = true;
+                    }
+                    else if (defense === 0) {
+                        attackWin = true;
+                    }
+                    else if (defense === -1) {
+                        bombRemain--;
+                    }
+                    else if (defense === -2) {
+                        mineRemain--;
+                    }
+                    if (bombRemain < 0) {
+                        alert("炸弹数目超过4个，赖歪毛子不赢人！！！");
+                        openDiv(event, "kidGameMainDiv");
+                    }
+                    if (mineRemain < 0) {
+                        alert("地雷数目超过6个，赖歪毛子不赢人！！！");
+                        openDiv(event, "kidGameMainDiv");
+                    }
+                }
+                else {
+                    if (defense === -1) {
+                        bombRemain--;
+                        defenseAlive = false;
+                        attackAlive = false;
+                        if (attack === 9 && commanderHasDone === false) {
+                            commanderHasDone = true;
+                            attackCommanderDone = true;
+                        }
+                        if (bombRemain < 0) {
+                            alert("炸弹数目超过4个，赖歪毛子不赢人！！！");
+                            openDiv(event, "kidGameMainDiv");
+                        }
+                    }
+                    else if (defense === -2) {
+                        if (mineRule === "allDone") {
+                            defenseAlive = false;
+                        }
+                        if (attack === 1) {
+                            defenseAlive = false;
+                            mineRemain--;
+                        }
+                        else {
+                            attackAlive = false;
+                            if (mineRule === "allDone") {
+                                mineRemain--;
+                            }
+                            if (attack === 9 && commanderHasDone === false) {
+                                commanderHasDone = true;
+                                attackCommanderDone = true;
+                            }
+                        }
+
+                        if (mineRemain < 0) {
+                            alert("地雷数目超过6个，赖歪毛子不赢人！！！");
+                            openDiv(event, "kidGameMainDiv");
+                        }
+                    }
+                    else if (defense === 0) {
+                        defenseAlive = false;
+                        attackWin = true;
+                    }
+                    else {
+                        if (attack > defense) {
+                            defenseAlive = false;
+                        }
+                        else if (defense > attack) {
+                            attackAlive = false;
+                        }
+                        else {
+                            attackAlive = false;
+                            defenseAlive = false;
+                        }
+                    }
+                }
+
+                if (attackAlive) {
+                    fightResult = "进攻方存活"
+                }
+                else {
+                    fightResult = "进攻方阵亡"
+                }
+                if (defenseAlive) {
+                    fightResult += "，防守方存活"
+                }
+                else {
+                    fightResult += "，防守方阵亡"
+                }
+                if (attackCommanderDone) {
+                    fightResult += "\n进攻方司令阵亡，请进攻方亮出军旗！"
+                }
+                if (defenseCommanderDone) {
+                    fightResult += "\n防守方司令阵亡，请防守方亮出军旗！"
+                }
+                if (attackWin) {
+                    fightResult += "\n进攻方夺取军旗，恭喜进攻方获胜！"
+                }
+
+                // 战斗结果进行展示
+                let resultAreaObj = document.getElementById("resultArea");
+                $(resultAreaObj).val(fightResult);//.replace(/\n/g,"\r\n");
+
+                // 将结果进行显示
+                openDiv(event, "fightResultDiv");
+            }
+        }
+
+        // 军棋继续进攻
+        function militaryAttackAgain() {
+            $("#attackPieceSelect").val("unselected");
+            $("#defensePieceSelect").val("unselected");
+            openDiv(event, "militaryAttackDiv");
+        }
+
+        // 回主界面
+        function openMainDiv() {
+            commanderHasDone = false;
+            mineRule = "";
+            openDiv(event, "kidGameMainDiv");
+        }
+
+        // 放弃游戏
+        function gameOverDiv() {
+            let r = confirm("是否结束游戏，确定则会丢失游戏进度");
+            if (r === true) {
+                $("#attackPieceSelect").val("unselected");
+                $("#defensePieceSelect").val("unselected");
+                openDiv(event, "kidGameMainDiv");
+            }
+        }
+
+        function formatDuring(mss) {
+            //let days = parseInt(mss / (1000 * 60 * 60 * 24));
+            let hours = parseInt(String((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+            let minutes = parseInt(String((mss % (1000 * 60 * 60)) / (1000 * 60)));
+            let seconds = (mss % (1000 * 60)) / 1000;
+            return hours + " 小时 " + minutes + " 分钟 " + seconds + " 秒 "; //days + " 天 " +
+        }
+
+        // 递交答案获取结果，因为要写日志所以放到python中取判断
+        function submitAnswer() {
+            let endTs =new Date().getTime();
+            let thisResult = {
+                duration: formatDuring(endTs - startTs),
+                corrCnt: 0,
+                errCnt: 0,
+                result: "",
+            };
+            if (document.getElementById("gameSelect").value === "math") {
+                let thisAnswer = [];
+                $('#mathExamUl li.table-row').each(function (index, item)
+                    {
+                        let $item = $(item);
+                        let answer = $item.find("div input[name='item-value']").val();
+                        thisAnswer.push(answer);
+                    }
+                );
+                let post_url = "/kid/edu/math/score";
+                $.ajax({
+                    type: "POST",
+                    async: false, //加这个ajax就可以修改全局变量了
+                    dataType: "json",
+                    url: post_url,
+                    data: {
+                        "examContent": JSON.stringify(examContent),
+                        "duration": thisResult.duration,
+                        "answer": JSON.stringify(thisAnswer),
+                    },
+                    success: function (data) {
+                        thisResult = data;
+                    },
+                    error:function (xhr, ajaxOptions, thrownError) {
+                        alert('递交答案时出错，请联系家长');
+                        {#alert(xhr.status);#}
+                        {#alert(thrownError);#}
+                    }
+                });
+            }
+            retryInfo.push(thisResult);
+
+            //将历次提交的结果进行展示
+            let resultContent = "";
+            let resultAreaObj = document.getElementById("resultArea");
+            resultAreaObj.setAttribute("rows", String(retryInfo.length * 4));
+            for (let i = 0; i < retryInfo.length; i++) {
+                if (i === 0) {
+                    resultContent += "本次回答取得成绩为: " + retryInfo[i].result + "\n\n";
+                }
+                else {
+                    resultContent += "========\n第" + i + "次修正: " + retryInfo[i].result + "\n\n";
+                }
+            }
+            $(resultAreaObj).val(resultContent);//.replace(/\n/g,"\r\n");
+
+            // 将结果进行显示
+            openDiv(event, "examResultDiv");
+        }
+
+        // 与div的显示相关
+        function openDiv(evt, divName) {
+            let i, base_divs;
+            base_divs = document.getElementsByClassName("basediv");
+            for (i = 0; i < base_divs.length; i++) {
+                base_divs[i].style.display = "none";
+            }
+            document.getElementById(divName).style.display = "block";
+        }
+
+        openMainDiv(); // 默认打开主界面
+    </script>
+
+
+</body>
+
+</html>
