@@ -6,7 +6,6 @@
     <title>孩子放松小游戏</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- script
     <!-- <script src="https://unpkg.com/gojs/release/go-debug.js"></script>
     <script src="/static/js/jquery-1.9.1.js"></script>
     <script src="/static/js/jquery-ui.js"></script>
@@ -89,8 +88,8 @@
         <p></p>
         <label for="mineRuleSelect">请选地雷被工兵和炸弹之外的棋子攻击时的规则:</label>
         <select name="mineRule" id="mineRuleSelect" title="选择难度">
-            <option value="allDone">同归于尽</option>
-            <option value="mineRemain">保留地雷</option>
+            <option value="allDone">同归于尽(简单)</option>
+            <option value="mineRemain">保留地雷(困难)</option>
         </select>
         <p></p>
         <input type="button" value="开始游戏" class="button blue bigrounded" onclick="beginMilitaryGame()">
@@ -100,8 +99,7 @@
     </div>
 
     <div id="militaryAttackDiv" class="basediv" style="position:absolute; top: 10%; left: 20%;">
-        <h1>进攻方选择自己正在进攻的棋子</h1>
-        <p></p>
+        <h1>请进攻方选择自己的颜色和棋子</h1>
         <label for="attackPieceSelect">请选棋子的军衔（诚实诚信，拒绝赖歪毛子）:</label>
         <select name="piece" id="attackPieceSelect" title="选择棋子的大小">
             <option value=unselected>请选择</option>
@@ -116,6 +114,25 @@
             <option value=9>司令</option>
             <option value=-1>炸弹</option>
         </select>
+        <p> <hr /> </p>
+        <form>
+            <div id="attackColor">
+                <table>
+                    <tr>
+                        <td>选择颜色</td>
+                        <td><input type="radio" name="attackColorRatio" onclick="displayColorResult(this.value)" value="unselected">请选择<br></td>
+                        <td><input type="radio" name="attackColorRatio" onclick="displayColorResult(this.value)" value="red">红色<br></td>
+                        <td><input type="radio" name="attackColorRatio" onclick="displayColorResult(this.value)" value="black">黑色<br></td>
+                    </tr>
+                    <tr>
+                        <td>你棋子的颜色是: </td>
+                        <td></td>
+                        <td><span id="redColor" style="font-size: large; color: red; display: none">红色</span></td>
+                        <td><span id="blackColor" style="font-size: large; color: midnightblue; display: none">黑色</span></td>
+                    </tr>
+                </table>
+            </div>
+        </form>
         <p></p>
         <input type="button" id="submitBut" value="点击确定进攻方选择完毕" class="button blue bigrounded" onclick="militaryDefenseDiv()">
         <hr />
@@ -149,11 +166,54 @@
 
     <div id="fightResultDiv" class="basediv" style="position:absolute; top: 10%; left: 20%;">
         <h1>战斗结果</h1>
-        <label for="resultArea">本次战斗的结果为: </label>
+        <label for="fightForm">本次战斗的结果为: </label>
         <p></p>
-        <textarea id="resultArea" cols="50" rows="3" readonly></textarea>
+        <form id="fightForm">
+        <table  border="1">
+            <tr>
+                <td>
+                    <span style="font-size: large; color: red; ">红方棋子：</span>
+                </td>
+                <td>
+                    <span id="redAliveResult" style="font-size: large; color: red; font-weight: bold">存活</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span style="font-size: large; color: midnightblue; ">黑方棋子：</span>
+                </td>
+                <td>
+                    <span id="blackAliveResult" style="font-size: large; color: midnightblue; font-weight: bold">存活</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span style="font-size: large; color: violet; ">对局势的影响结果：</span>
+                </td>
+                <td>
+                    <span id="situationResult" style="font-size: large; color: violet; font-weight: bold">无</span>
+                </td>
+            </tr>
+        </table>
+        </form>
+        <div id="historyDiv" style="display: none">
+            <hr />
+            <label for="historyTable">请观看对战历史: </label>
+            <table id="historyTable" border="1" title="对战历史记录">
+                <thead>
+                <tr>
+                    <th width="10%" class="text-center">轮数</th>
+                    <th width="30%" class="text-center">棋子</th>
+                    <th width="20%" class="text-center">动作</th>
+                    <th width="30%" class="text-center">棋子</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
         <p></p>
-        <input type="button" id="submitBut" value="再次发起进攻" class="button rosy bigrounded" onclick="militaryAttackAgain()">
+        <input type="button" id="attackAgainBut" value="再次发起进攻" class="button rosy bigrounded" onclick="militaryAttackAgain()">
         <hr />
         <input type="button" id="correctBut" value="结束游戏" class="button orange bigrounded" onclick="gameOverDiv()">
     </div>
@@ -165,6 +225,23 @@
         let mineRule = "";  // 地雷的规则
         let bombRemain = 4;  // 炸弹的总数
         let mineRemain = 6;  // 地雷的总数
+        let redArmy = [];  // 红色军棋历史
+        let blackArmy = [];  // 黑色军棋历史
+        let attackList = [];  // 进攻顺序历史
+        let chessMap = {
+            "0":"军旗",
+            "1":"工兵",
+            "2":"排长",
+            "3":"连长",
+            "4":"营长",
+            "5":"团长",
+            "6":"旅长",
+            "7":"师长",
+            "8":"军长",
+            "9":"司令",
+            "-1":"炸弹",
+            "-2":"地雷",
+        };
 
         // 打开游戏规则
         function showGameRule() {
@@ -185,13 +262,39 @@
             else {
                 mineRemain = 999;
             }
+            redArmy = [];
+            blackArmy = [];
+            attackList = [];
+
+            $("#attackAgainBut").show();
+            $("#historyDiv").hide();
+            $("#historyTable tbody").empty();
             openDiv(event, "militaryAttackDiv");
+        }
+
+        // 进攻方的颜色
+        function displayColorResult(color){
+            if (color === "red") {
+                document.getElementById("redColor").style.display = "block";
+                document.getElementById("blackColor").style.display = "none";
+            }
+            else if (color === "black") {
+                document.getElementById("redColor").style.display = "none";
+                document.getElementById("blackColor").style.display = "block";
+            }
+            else {
+                document.getElementById("redColor").style.display = "none";
+                document.getElementById("blackColor").style.display = "none";
+            }
         }
 
         // 军棋防守方选择
         function militaryDefenseDiv() {
             if (document.getElementById("attackPieceSelect").value === "unselected") {
                 alert("请选择进攻方棋子军衔");
+            }
+            else if ($("input[name='attackColorRatio']:checked").val() === "unselected") {
+                alert("请选择进攻方棋子颜色");
             }
             else {
                 openDiv(event, "militaryDefenseDiv");
@@ -204,18 +307,30 @@
                 alert("请选择进攻方棋子军衔");
                 return;
             }
+            let attackChessStr = document.getElementById("attackPieceSelect").value;
+            let defenseChessStr = document.getElementById("defensePieceSelect").value;
+            let attackColor = $("input[name='attackColorRatio']:checked").val();
+            if (attackColor === "red") {
+                attackList.push("red");
+                redArmy.push(chessMap[attackChessStr]);
+                blackArmy.push(chessMap[defenseChessStr]);
+            }
+            else {
+                attackList.push("black");
+                redArmy.push(chessMap[defenseChessStr]);
+                blackArmy.push(chessMap[attackChessStr]);
+            }
             if (mineRule === "") {
                 alert("游戏遇到bug，请抓紧告知家长！")
             }
             else {
-                let attack = Number(document.getElementById("attackPieceSelect").value);
-                let defense = Number(document.getElementById("defensePieceSelect").value);
+                let attack = Number(attackChessStr);
+                let defense = Number(defenseChessStr);
                 let attackAlive = true;
                 let defenseAlive = true;
                 let attackCommanderDone = false;
                 let defenseCommanderDone = false;
                 let attackWin = false;
-                let fightResult;
                 if (attack < 0) {
                     bombRemain--;
                     attackAlive = false;
@@ -299,30 +414,91 @@
                 }
 
                 if (attackAlive) {
-                    fightResult = "进攻方存活"
+                    if (attackColor === "red") {
+                        $("#redAliveResult").text("存活")
+                    }
+                    else {
+                        $("#blackAliveResult").text("存活")
+                    }
                 }
                 else {
-                    fightResult = "进攻方阵亡"
+                    if (attackColor === "red") {
+                        $("#redAliveResult").text("阵亡")
+                    }
+                    else {
+                        $("#blackAliveResult").text("阵亡")
+                    }
                 }
                 if (defenseAlive) {
-                    fightResult += "，防守方存活"
+                    if (attackColor === "red") {
+                        $("#blackAliveResult").text("存活")
+                    }
+                    else {
+                        $("#redAliveResult").text("存活")
+                    }
                 }
                 else {
-                    fightResult += "，防守方阵亡"
+                    if (attackColor === "red") {
+                        $("#blackAliveResult").text("阵亡")
+                    }
+                    else {
+                        $("#redAliveResult").text("阵亡")
+                    }
                 }
+                $("#situationResult").text("无");
                 if (attackCommanderDone) {
-                    fightResult += "\n进攻方司令阵亡，请进攻方亮出军旗！"
+                    if (attackColor === "red") {
+                        $("#situationResult").text("红方司令阵亡，但黑方司令尚在，所以红方需要亮出军旗位置！")
+                    }
+                    else {
+                        $("#situationResult").text("黑方司令阵亡，但红方司令尚在，所以黑方需要亮出军旗位置！")
+                    }
                 }
                 if (defenseCommanderDone) {
-                    fightResult += "\n防守方司令阵亡，请防守方亮出军旗！"
+                    if (attackColor === "red") {
+                        $("#situationResult").text("黑方司令阵亡，但红方司令尚在，所以黑方需要亮出军旗位置！")
+                    }
+                    else {
+                        $("#situationResult").text("红方司令阵亡，但黑方司令尚在，所以红方需要亮出军旗位置！")
+                    }
                 }
                 if (attackWin) {
-                    fightResult += "\n进攻方夺取军旗，恭喜进攻方获胜！"
+                    if (attackColor === "red") {
+                        $("#situationResult").text("红方夺取军旗，恭喜红方获胜！")
+                    }
+                    else {
+                        $("#situationResult").text("黑方夺取军旗，恭喜黑方获胜！")
+                    }
+
+                    $("#attackAgainBut").hide();
+                    //document.getElementById("attackAgainBut").style.display = "block";
+                    $("#historyDiv").show();
+                    $.each(attackList, function (index, attackItm) {
+                        let newTr;
+                        let showIdx = index + 1;
+                        if (attackItm === "red") {
+                            newTr = "<tr>" +
+                            "<td><span style=\"font-size: small; color: black; font-weight: bold\">" + showIdx + "</span></td>" +
+                            "<td><span style=\"font-size: large; color: red; font-weight: bold\">" + redArmy[index] + "</span></td>" +
+                            "<td><span style=\"font-size: small; color: black; font-weight: bold\">进攻</span></td>" +
+                            "<td><span style=\"font-size: large; color: midnightblue; font-weight: bold\">" + blackArmy[index] + "</span></td>" +
+                            "</tr>";
+                        }
+                        else {
+                            newTr = "<tr>" +
+                            "<td><span style=\"font-size: small; color: black; font-weight: bold\">" + showIdx + "</span></td>" +
+                            "<td><span style=\"font-size: large; color: midnightblue; font-weight: bold\">" + blackArmy[index] + "</span></td>" +
+                            "<td><span style=\"font-size: small; color: black; font-weight: bold\">进攻</span></td>" +
+                            "<td><span style=\"font-size: large; color: red; font-weight: bold\">" + redArmy[index] + "</span></td>" +
+                            "</tr>";
+                        }
+                        $("#historyTable tbody").append(newTr);
+                    });
                 }
 
                 // 战斗结果进行展示
-                let resultAreaObj = document.getElementById("resultArea");
-                $(resultAreaObj).val(fightResult);//.replace(/\n/g,"\r\n");
+                // let resultAreaObj = document.getElementById("resultArea");
+                // $(resultAreaObj).val(fightResult);//.replace(/\n/g,"\r\n");
 
                 // 将结果进行显示
                 openDiv(event, "fightResultDiv");
@@ -333,6 +509,9 @@
         function militaryAttackAgain() {
             $("#attackPieceSelect").val("unselected");
             $("#defensePieceSelect").val("unselected");
+            $("input[type='radio'][name='attackColorRatio']").get(0).checked = true;
+            document.getElementById("redColor").style.display = "none";
+            document.getElementById("blackColor").style.display = "none";
             openDiv(event, "militaryAttackDiv");
         }
 
@@ -349,6 +528,9 @@
             if (r === true) {
                 $("#attackPieceSelect").val("unselected");
                 $("#defensePieceSelect").val("unselected");
+                $("input[type='radio'][name='attackColorRatio']").get(0).checked = true;
+                document.getElementById("redColor").style.display = "none";
+                document.getElementById("blackColor").style.display = "none";
                 openDiv(event, "kidGameMainDiv");
             }
         }
