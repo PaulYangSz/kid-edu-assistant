@@ -137,6 +137,8 @@
         <input type="button" id="submitBut" value="点击确定进攻方选择完毕" class="button blue bigrounded" onclick="militaryDefenseDiv()">
         <hr />
         <input type="button" id="correctBut" value="退出游戏" class="button orange bigrounded" onclick="gameOverDiv()">
+        <hr />
+        <input type="button" id="correctBut" value="握手言和" class="button green bigrounded" onclick="gameDrawDiv()">
     </div>
 
     <div id="militaryDefenseDiv" class="basediv" style="position:absolute; top: 10%; left: 20%;">
@@ -297,18 +299,26 @@
                 alert("请选择进攻方棋子颜色");
             }
             else {
-                openDiv(event, "militaryDefenseDiv");
+                let army = chessMap[document.getElementById("attackPieceSelect").value];
+                let color = $("input[name='attackColorRatio']:checked").val() === "red" ? '红色' : '黑色';
+                let r = confirm("请确认你的棋子颜色是：" + color + "，军衔是：" + army);
+                if (r === true) {
+                    openDiv(event, "militaryDefenseDiv");
+                }
             }
         }
 
         // 军旗比较大小
         function militaryFight() {
             if (document.getElementById("defensePieceSelect").value === "unselected") {
-                alert("请选择进攻方棋子军衔");
+                alert("请选择防守方棋子军衔");
                 return;
             }
             let attackChessStr = document.getElementById("attackPieceSelect").value;
             let defenseChessStr = document.getElementById("defensePieceSelect").value;
+            if (confirm("请确认你的棋子军衔是：" + chessMap[defenseChessStr]) === false) {
+                return;
+            }
             let attackColor = $("input[name='attackColorRatio']:checked").val();
             if (attackColor === "red") {
                 attackList.push("red");
@@ -532,6 +542,15 @@
                 document.getElementById("redColor").style.display = "none";
                 document.getElementById("blackColor").style.display = "none";
                 openDiv(event, "kidGameMainDiv");
+            }
+        }
+
+        // 平局结束
+        function gameDrawDiv() {
+            let r = confirm("双方是否都同意平局？接下来将会公布对战记录");
+            if (r === true) {
+                // 将结果进行显示
+                openDiv(event, "fightResultDiv");
             }
         }
 
