@@ -536,6 +536,7 @@
         function gameOverDiv() {
             let r = confirm("是否结束游戏，确定则会丢失游戏进度");
             if (r === true) {
+                $("#fightForm").show();
                 $("#attackPieceSelect").val("unselected");
                 $("#defensePieceSelect").val("unselected");
                 $("input[type='radio'][name='attackColorRatio']").get(0).checked = true;
@@ -549,6 +550,31 @@
         function gameDrawDiv() {
             let r = confirm("双方是否都同意平局？接下来将会公布对战记录");
             if (r === true) {
+                $("#fightForm").hide();
+                $("#attackAgainBut").hide();
+                //document.getElementById("attackAgainBut").style.display = "block";
+                $("#historyDiv").show();
+                $.each(attackList, function (index, attackItm) {
+                    let newTr;
+                    let showIdx = index + 1;
+                    if (attackItm === "red") {
+                        newTr = "<tr>" +
+                        "<td><span style=\"font-size: small; color: black; font-weight: bold\">" + showIdx + "</span></td>" +
+                        "<td><span style=\"font-size: large; color: red; font-weight: bold\">" + redArmy[index] + "</span></td>" +
+                        "<td><span style=\"font-size: small; color: black; font-weight: bold\">进攻</span></td>" +
+                        "<td><span style=\"font-size: large; color: midnightblue; font-weight: bold\">" + blackArmy[index] + "</span></td>" +
+                        "</tr>";
+                    }
+                    else {
+                        newTr = "<tr>" +
+                        "<td><span style=\"font-size: small; color: black; font-weight: bold\">" + showIdx + "</span></td>" +
+                        "<td><span style=\"font-size: large; color: midnightblue; font-weight: bold\">" + blackArmy[index] + "</span></td>" +
+                        "<td><span style=\"font-size: small; color: black; font-weight: bold\">进攻</span></td>" +
+                        "<td><span style=\"font-size: large; color: red; font-weight: bold\">" + redArmy[index] + "</span></td>" +
+                        "</tr>";
+                    }
+                    $("#historyTable tbody").append(newTr);
+                });
                 // 将结果进行显示
                 openDiv(event, "fightResultDiv");
             }
