@@ -44,11 +44,29 @@ def subtract_difficulty_match(difficulty, first, second):
             return False
 
 
+def mul_difficulty_match(difficulty, first, second):
+    if difficulty == 1:
+        if first < 40 and second < 40 and first * second < 1000:
+            return True
+        else:
+            return False
+    elif difficulty == 2:
+        if min(first, second) < 40 and max(first, second) > 40 and first % 10 + second % 10 <= 10:
+            return True
+        else:
+            return False
+    elif difficulty == 3:
+        if first % 10 + second % 10 >= 10 and first//10 % 10 + second//10 % 10 >= 9:
+            return True
+        else:
+            return False
+
+
 @bp.route('/math', methods=['POST'])
 def get_math_exam():
     grade, difficulty, cnt = request.form.get('grade'), request.form.get('difficulty'), int(request.form.get('cnt'))
     difficulty = int(difficulty)
-    log.info('\n\n==========\n获取数学 {}年级 难度{} 的{}道题目'.format(grade, difficulty, cnt))
+    log.info('\n\n==========\n获取数学 {}年级 难度{} 的{}道题目'.format(grade, difficulty, cnt).encode('utf-8'))
     exams = []
     max_iter_n = 1000
     if grade == 'grade1First':
@@ -99,7 +117,38 @@ def get_math_exam():
                 exam_item['itemTitle'] = '{} - {} = '.format(a, b)
                 exam_item['itemValue'] = a - b
             exams.append(exam_item)
-    log.info('题目为:\n{}'.format(exams))
+    elif grade == 'grade3Second':
+        for i in range(cnt):
+            exam_item = {}
+            mul_or_div = random.randint(1, 1)
+            if mul_or_div == 1:
+                a = random.randint(10, 99)
+                b = random.randint(10, 99)
+                iter_i = 0
+                while not mul_difficulty_match(difficulty, a, b):
+                    a = random.randint(10, 99)
+                    b = random.randint(10, 99)
+                    if iter_i > max_iter_n:
+                        break
+                    else:
+                        iter_i += 1
+                exam_item['itemTitle'] = '{} x {} = '.format(a, b)
+                exam_item['itemValue'] = a * b
+            else:
+                a = random.randint(201, 999)
+                b = random.randint(100, a-2)
+                iter_i = 0
+                while not subtract_difficulty_match(difficulty, a, b):
+                    a = random.randint(201, 999)
+                    b = random.randint(100, a - 2)
+                    if iter_i > max_iter_n:
+                        break
+                    else:
+                        iter_i += 1
+                exam_item['itemTitle'] = '{} - {} = '.format(a, b)
+                exam_item['itemValue'] = a - b
+            exams.append(exam_item)
+    log.info('题目为:\n{}'.format(exams).encode('utf-8'))
     return json.dumps(exams)
 
 

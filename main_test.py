@@ -19,7 +19,7 @@ def absdirpath(file, *parts):
 
 if __name__ == "__main__":
     host = '0.0.0.0'
-    port = int(sys.argv[1]) if len(sys.argv) >= 2 else 5000
+    port = int(sys.argv[1]) if len(sys.argv) >= 2 else 11504
     app = factory.create_app(absdirpath(__file__, '.', 'config', 'assistant_server_test.cfg'))
     log.info('Starting server on: %s:%d.' % (host, port))
     server = pywsgi.WSGIServer((host, port), app)
